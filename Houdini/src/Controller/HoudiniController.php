@@ -190,16 +190,11 @@ class HoudiniController
      */
      protected function cleanupTmpFiles() {
 
-        // If there's are magick-* or php* files in /tmp, clean them up.
+        // If there's are magick-* files in /tmp, clean them up.
         // We could just do this, but for now let's add some logging.
         //   array_map('unlink', glob('/tmp/magick-*'));
-        //   array_map('unlink', glob('/tmp/php*'));
         try {
             foreach (glob('/tmp/magick-*') as $filename) {
-                $this->log->info("removing file $filename");
-                unlink($filename);
-            }
-            foreach (glob('/tmp/php*') as $filename) {
                 $this->log->info("removing file $filename");
                 unlink($filename);
             }
