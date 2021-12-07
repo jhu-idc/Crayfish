@@ -115,11 +115,6 @@ class HoudiniController
         $cmd_string = "$this->executable - $args $format:-";
         $this->log->info('Imagemagick Command:', ['cmd' => $cmd_string]);
 
-        // Clean up any tmp files remaining from last run.  In theory there is
-        // nothing, because if something failed it already got cleaned up by the code
-        // below, but it doesn't hurt to do this just in case
-        $this->cleanupTmpFiles();
-
         // Return response.
         try {
             return new StreamedResponse(
@@ -129,10 +124,6 @@ class HoudiniController
             );
         } catch (\RuntimeException $e) {
             $this->log->error("RuntimeException:", ['exception' => $e]);
-
-            // imagemagick leaves temp files behind when it fails,
-            // so there are probably some there now. Clean them up
-            $this->cleanupTmpFiles();
             return new Response($e->getMessage(), 500);
         }
     }
@@ -180,26 +171,6 @@ class HoudiniController
         } catch (\RuntimeException $e) {
             $this->log->error("RuntimeException:", ['exception' => $e]);
             return new Response($e->getMessage(), 500);
-        }
-    }
-
-    /**
-     * imagemagick will sometimes leave tmp files behind, this will clean them up.
-     * Be careful about when you call this, else you could delete work that's in
-     * progress.
-     */
-     protected function cleanupTmpFiles() {
-
-        // If there's are magick-* files in /tmp, clean them up.
-        // We could just do this, but for now let's add some logging.
-        //   array_map('unlink', glob('/tmp/magick-*'));
-        try {
-            foreach (glob('/tmp/magick-*') as $filename) {
-                $this->log->info("removing file $filename");
-                unlink($filename);
-            }
-        } catch (\ErrorException $e) {
-            $this->log->error("ErrorException:", ['exception' => $e]);
         }
     }
 }
